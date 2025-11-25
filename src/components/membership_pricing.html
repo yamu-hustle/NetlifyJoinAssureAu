@@ -107,7 +107,7 @@
 <div class="fixed z-[999] h-screen w-full left-0 top-0 opacity-0 pointer-events-none overflow-auto bg-black/80 hidden transition-opacity duration-300 group/modal group-[.ready]/body:block [&.is-open]:opacity-100 [&.is-open]:pointer-events-auto" id="signupModal" role="dialog" aria-labelledby="signupModal" aria-hidden="true">
     <div tabindex="-1" data-mm-dismiss class="w-full h-full">
         <div role="dialog" aria-modal="true" aria-labelledby="signupModal-title" class="h-full px-4 py-8 lg:py-10 flex justify-center items-center">
-            <div id="signupModal-content" class="m-auto w-full text-center max-w-xl bg-white translate-y-8 transition-transform duration-300 px-5 pt-10 pb-6 md:px-10 md:py-10 motion-reduce:transition-none group-[.is-open]/modal:translate-y-0 rounded-lg">
+            <div id="signupModal-content" class="m-auto w-full text-center max-w-xl bg-white translate-y-8 transition-transform duration-300 px-5 pt-10 pb-6 md:px-10 md:py-10 motion-reduce:transition-none group-[.is-open]/modal:translate-y-0 rounded-lg" onclick="event.stopPropagation();">
                 <span data-mm-dismiss class="block text-black absolute top-4 right-4 md:top-5 md:right-5 cursor-pointer w-4">
                     <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto pointer-events-none">
                         <path d="M16.7071 1.70711C17.0976 1.31658 17.0976 0.683417 16.7071 0.292893C16.3166 -0.0976311 15.6834 -0.0976311 15.2929 0.292893L16.7071 1.70711ZM0.292893 15.2929C-0.0976311 15.6834 -0.0976311 16.3166 0.292893 16.7071C0.683417 17.0976 1.31658 17.0976 1.70711 16.7071L0.292893 15.2929ZM1.70711 0.292893C1.31658 -0.0976311 0.683417 -0.0976311 0.292893 0.292893C-0.0976311 0.683417 -0.0976311 1.31658 0.292893 1.70711L1.70711 0.292893ZM15.2929 16.7071C15.6834 17.0976 16.3166 17.0976 16.7071 16.7071C17.0976 16.3166 17.0976 15.6834 16.7071 15.2929L15.2929 16.7071ZM15.2929 0.292893L0.292893 15.2929L1.70711 16.7071L16.7071 1.70711L15.2929 0.292893ZM0.292893 1.70711L15.2929 16.7071L16.7071 15.2929L1.70711 0.292893L0.292893 1.70711Z" fill="black" />
@@ -281,45 +281,81 @@
     }
 
     function validatePhone(phone) {
+        if (!phone || phone.trim() === '') {
+            return false;
+        }
+        
         const country = getCountryFromDomain();
-        // Remove spaces, dashes, and parentheses for validation
-        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        // Remove spaces, dashes, parentheses, and plus signs for validation (we'll handle country codes separately)
+        let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        
+        // Check if it contains only digits and allowed characters
+        if (!/^[\d+]+$/.test(cleaned)) {
+            return false;
+        }
         
         switch (country) {
             case 'AU': // Australia
-                // Australian phone: 10 digits, can start with 0 or +61
-                // Mobile: 04XX XXX XXX (10 digits)
-                // Landline: (02) XXXX XXXX or (03-08) XXXX XXXX
-                return /^(\+61|0)?[2-478]\d{8}$/.test(cleaned) && cleaned.replace(/^\+61|^0/, '').length === 9;
+                // Australian mobile: must start with 04 and be 10 digits total
+                // Can have +61 or 0 prefix
+                if (cleaned.startsWith('+61')) {
+                    cleaned = cleaned.substring(3);
+                } else if (cleaned.startsWith('61')) {
+                    cleaned = cleaned.substring(2);
+                } else if (cleaned.startsWith('0')) {
+                    cleaned = cleaned.substring(1);
+                }
+                // Mobile numbers must start with 4 and be 9 digits (after removing country code)
+                return /^4\d{8}$/.test(cleaned) && cleaned.length === 9;
             
             case 'USA': // United States
-                // US phone: 10 digits, can have +1 prefix
-                // Format: (XXX) XXX-XXXX or XXX-XXX-XXXX
-                const usCleaned = cleaned.replace(/^\+1/, '');
-                return /^\d{10}$/.test(usCleaned);
+                // US phone: exactly 10 digits, can have +1 prefix
+                if (cleaned.startsWith('+1')) {
+                    cleaned = cleaned.substring(2);
+                } else if (cleaned.startsWith('1') && cleaned.length === 11) {
+                    cleaned = cleaned.substring(1);
+                }
+                // Must be exactly 10 digits, first digit cannot be 0 or 1
+                return /^[2-9]\d{9}$/.test(cleaned) && cleaned.length === 10;
             
             case 'SG': // Singapore
-                // Singapore phone: 8 digits, can start with +65
-                // Mobile: 8XXXXXXX or 9XXXXXXX
-                const sgCleaned = cleaned.replace(/^\+65/, '');
-                return /^[689]\d{7}$/.test(sgCleaned) && sgCleaned.length === 8;
+                // Singapore mobile: 8 digits starting with 6, 8, or 9
+                if (cleaned.startsWith('+65')) {
+                    cleaned = cleaned.substring(3);
+                } else if (cleaned.startsWith('65')) {
+                    cleaned = cleaned.substring(2);
+                }
+                // Must be exactly 8 digits starting with 6, 8, or 9
+                return /^[689]\d{7}$/.test(cleaned) && cleaned.length === 8;
             
             case 'NZ': // New Zealand
-                // New Zealand phone: 8-9 digits, can start with 0 or +64
-                // Mobile: 02X XXX XXXX (9 digits) or 2X XXX XXXX (8 digits)
-                // Landline: 0X XXXX XXXX (9 digits)
-                const nzCleaned = cleaned.replace(/^\+64|^0/, '');
-                return /^[2-9]\d{7,8}$/.test(nzCleaned) && (nzCleaned.length === 8 || nzCleaned.length === 9);
+                // New Zealand mobile: 8-9 digits, mobile starts with 2
+                if (cleaned.startsWith('+64')) {
+                    cleaned = cleaned.substring(3);
+                } else if (cleaned.startsWith('64')) {
+                    cleaned = cleaned.substring(2);
+                } else if (cleaned.startsWith('0')) {
+                    cleaned = cleaned.substring(1);
+                }
+                // Mobile numbers start with 2 and are 8-9 digits
+                return /^2\d{7,8}$/.test(cleaned) && (cleaned.length === 8 || cleaned.length === 9);
             
             case 'IN': // India
-                // Indian phone: 10 digits, can start with +91 or 0
-                // Mobile: 6-9 followed by 9 digits
-                const inCleaned = cleaned.replace(/^\+91|^0/, '');
-                return /^[6-9]\d{9}$/.test(inCleaned) && inCleaned.length === 10;
+                // Indian mobile: 10 digits starting with 6, 7, 8, or 9
+                if (cleaned.startsWith('+91')) {
+                    cleaned = cleaned.substring(3);
+                } else if (cleaned.startsWith('91')) {
+                    cleaned = cleaned.substring(2);
+                } else if (cleaned.startsWith('0')) {
+                    cleaned = cleaned.substring(1);
+                }
+                // Must be exactly 10 digits starting with 6-9
+                return /^[6-9]\d{9}$/.test(cleaned) && cleaned.length === 10;
             
             default:
-                // Fallback: basic validation
-                return cleaned.length >= 8 && /^\d+$/.test(cleaned);
+                // Fallback: at least 8 digits
+                const digitsOnly = cleaned.replace(/\D/g, '');
+                return digitsOnly.length >= 8 && digitsOnly.length <= 15;
         }
     }
 
@@ -478,11 +514,19 @@
 
         // Disable submit button
         const submitBtn = document.getElementById('signupSubmit');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+        }
 
-        // Redirect to the generated URL
-        window.location.href = redirectUrl;
+        // Log for debugging
+        console.log('Redirecting to:', redirectUrl);
+
+        // Small delay to ensure button state updates, then redirect
+        // Use window.location.replace to prevent back button issues
+        setTimeout(() => {
+            window.location.replace(redirectUrl);
+        }, 150);
         });
     }
 
