@@ -107,7 +107,7 @@
 <div class="fixed z-[999] h-screen w-full left-0 top-0 opacity-0 pointer-events-none overflow-auto bg-black/80 hidden transition-opacity duration-300 group/modal group-[.ready]/body:block [&.is-open]:opacity-100 [&.is-open]:pointer-events-auto" id="signupModal" role="dialog" aria-labelledby="signupModal" aria-hidden="true">
     <div tabindex="-1" data-mm-dismiss class="w-full h-full">
         <div role="dialog" aria-modal="true" aria-labelledby="signupModal-title" class="h-full px-4 py-8 lg:py-10 flex justify-center items-center">
-            <div id="signupModal-content" class="m-auto w-full text-center max-w-xl bg-white translate-y-8 transition-transform duration-300 px-5 pt-10 pb-6 md:px-10 md:py-10 motion-reduce:transition-none group-[.is-open]/modal:translate-y-0 rounded-lg" onclick="event.stopPropagation();">
+            <div id="signupModal-content" class="m-auto w-full text-center max-w-xl bg-white translate-y-8 transition-transform duration-300 px-5 pt-10 pb-6 md:px-10 md:py-10 motion-reduce:transition-none group-[.is-open]/modal:translate-y-0 rounded-lg" onclick="event.stopPropagation();" onsubmit="return false;">
                 <span data-mm-dismiss class="block text-black absolute top-4 right-4 md:top-5 md:right-5 cursor-pointer w-4">
                     <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto pointer-events-none">
                         <path d="M16.7071 1.70711C17.0976 1.31658 17.0976 0.683417 16.7071 0.292893C16.3166 -0.0976311 15.6834 -0.0976311 15.2929 0.292893L16.7071 1.70711ZM0.292893 15.2929C-0.0976311 15.6834 -0.0976311 16.3166 0.292893 16.7071C0.683417 17.0976 1.31658 17.0976 1.70711 16.7071L0.292893 15.2929ZM1.70711 0.292893C1.31658 -0.0976311 0.683417 -0.0976311 0.292893 0.292893C-0.0976311 0.683417 -0.0976311 1.31658 0.292893 1.70711L1.70711 0.292893ZM15.2929 16.7071C15.6834 17.0976 16.3166 17.0976 16.7071 16.7071C17.0976 16.3166 17.0976 15.6834 16.7071 15.2929L15.2929 16.7071ZM15.2929 0.292893L0.292893 15.2929L1.70711 16.7071L16.7071 1.70711L15.2929 0.292893ZM0.292893 1.70711L15.2929 16.7071L16.7071 15.2929L1.70711 0.292893L0.292893 1.70711Z" fill="black" />
@@ -118,8 +118,9 @@
                     <h3 id="signupModal-title" class="text-2xl lg:text-3xl font-bold leading-tight mb-5">
                         Sign Up
                     </h3>
+                    <p id="selectedProductInfo" class="text-sm text-gray-600 mb-4 hidden"></p>
 
-                    <form id="signupForm" class="text-left" action="#" method="post" onsubmit="return false;">
+                    <form id="signupForm" class="text-left" action="#" method="post">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2" for="signup-email">Email <span class="text-red-500">*</span></label>
                             <input type="email" id="signup-email" name="email" class="text-base appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue" placeholder="Enter your email" required>
@@ -152,7 +153,7 @@
                             <span class="error-message text-red-500 text-sm hidden"></span>
                         </div>
 
-                        <button type="button" id="signupSubmit" class="signup-button w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition duration-300">
+                        <button type="submit" id="signupSubmit" class="signup-button w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition duration-300">
                             Continue
                         </button>
 
@@ -166,25 +167,53 @@
 
 <script type="module">
     import { getRRP, DEALER_ID, CAMPAIGN_NAME } from '../assets/js/membership-config.js';
-    import MicroModal from 'micromodal';
+    
+    // Import MicroModal from CDN (works in browser without bundler)
+    let MicroModal;
+    try {
+        const micromodalModule = await import('https://cdn.jsdelivr.net/npm/micromodal@0.4.10/dist/micromodal.es.js');
+        MicroModal = micromodalModule.default || micromodalModule;
+        // console.log('MicroModal loaded successfully');
+    } catch (error) {
+        // console.error('Failed to load MicroModal:', error);
+        alert('Error loading modal library. Please refresh the page.');
+        // Create a fallback object to prevent errors
+        MicroModal = {
+            show: () => {/* console.error('MicroModal not loaded'); */},
+            init: () => {/* console.error('MicroModal not loaded'); */}
+        };
+    }
+    
+    // Log that imports are loaded
+    console.log('Imports loaded:', { DEALER_ID, CAMPAIGN_NAME, getRRP: typeof getRRP, MicroModal: typeof MicroModal });
 
     // Get Facebook Pixel data from cookies
     function getFacebookPixel() {
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
+        try {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            
+            // Get Facebook Browser ID (_fbp) - used for browser-based tracking
+            const fbp = getCookie('_fbp');
+            // Get Facebook Click ID (_fbc) - used for click-based tracking from ads
+            const fbc = getCookie('_fbc');
+            
+            console.log('Facebook cookies:', { fbp, fbc });
+            
+            // Prefer _fbc if available (more specific for ad clicks), otherwise use _fbp
+            const pixelValue = fbc || fbp;
+            if (!pixelValue) {
+                // console.warn('No Facebook pixel cookie found, using default');
+            }
+            return pixelValue ? encodeURIComponent(pixelValue) : 'xxxxx';
+        } catch (error) {
+            // console.error('Error getting Facebook pixel:', error);
+            return 'xxxxx';
         }
-        
-        // Get Facebook Browser ID (_fbp) - used for browser-based tracking
-        const fbp = getCookie('_fbp');
-        // Get Facebook Click ID (_fbc) - used for click-based tracking from ads
-        const fbc = getCookie('_fbc');
-        
-        // Prefer _fbc if available (more specific for ad clicks), otherwise use _fbp
-        const pixelValue = fbc || fbp;
-        return pixelValue ? encodeURIComponent(pixelValue) : 'xxxxx';
     }
 
     // Store selected product ID
@@ -235,6 +264,22 @@
                 e.preventDefault();
                 selectedProductId = button.getAttribute('data-productId');
                 
+                // Debug: Log selected product ID
+                // console.log('Selected Product ID:', selectedProductId);
+                
+                // Show product info in modal
+                const productInfo = document.getElementById('selectedProductInfo');
+                if (productInfo) {
+                    const productNames = {
+                        '32': 'Assure Platinum - Annual Membership',
+                        '33': 'Assure Platinum - Pay Monthly',
+                        '34': 'Assure Gold - Annual Membership',
+                        '35': 'Assure Gold - Pay Monthly'
+                    };
+                    productInfo.textContent = `Signing up for: ${productNames[selectedProductId] || 'Product ' + selectedProductId}`;
+                    productInfo.classList.remove('hidden');
+                }
+                
                 // Reset form when opening modal
                 const form = document.getElementById('signupForm');
                 if (form) {
@@ -251,6 +296,13 @@
                     }
                 }
                 
+                // Reset submit button state
+                const submitBtn = document.getElementById('signupSubmit');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Continue';
+                }
+                
                 // Open modal using MicroModal
                 MicroModal.show('signupModal', {
                     openTrigger: 'data-mm-target',
@@ -258,6 +310,32 @@
                     openClass: 'is-open',
                     onShow: () => {
                         document.body.classList.add('overflow-hidden');
+                        
+                        // Reset submit button state when modal opens
+                        const submitBtn = document.getElementById('signupSubmit');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Continue';
+                        }
+                        
+                        // Ensure form handler is initialized when modal opens
+                        setTimeout(() => {
+                            // console.log('Modal opened, initializing form handler...');
+                            
+                            // Test if form and button exist
+                            const testForm = document.getElementById('signupForm');
+                            const testBtn = document.getElementById('signupSubmit');
+                            // console.log('After modal open - Form exists:', !!testForm, 'Button exists:', !!testBtn);
+                            
+                            // Initialize form handler
+                            initFormHandler();
+                            
+                            // Ensure button is still reset after handler initialization
+                            if (testBtn) {
+                                testBtn.disabled = false;
+                                testBtn.textContent = 'Continue';
+                            }
+                        }, 300);
                     },
                     onClose: () => {
                         document.body.classList.remove('overflow-hidden');
@@ -395,22 +473,36 @@
         const submitBtn = document.getElementById('signupSubmit');
         
         if (!form || !submitBtn) {
+            // console.log('Form or button not found, retrying...', { form: !!form, submitBtn: !!submitBtn });
             setTimeout(initFormHandler, 100);
             return;
         }
 
-        // Prevent any form submission
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-        }, true);
+        // console.log('Form handler initialized successfully');
+        // console.log('Form element:', form);
+        // console.log('Submit button element:', submitBtn);
 
-        // Handle button click instead of form submit
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        // Function to handle form submission
+        function handleFormSubmit(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            }
+            
+            try {
+                // console.log('=== FORM SUBMIT HANDLER CALLED ===');
+                
+                // console.log('Form submitted. Selected Product ID:', selectedProductId);
+                
+                // Check if product ID is set
+                if (!selectedProductId) {
+                    const errorMsg = 'Error: No product selected. Please close and try again.';
+                    // console.error('No product ID selected!');
+                    alert(errorMsg);
+                    showFormMessage(errorMsg, 'error');
+                    return false;
+                }
             
             const email = document.getElementById('signup-email').value.trim();
             const phone = document.getElementById('signup-phone').value.trim();
@@ -418,127 +510,197 @@
             const lastName = document.getElementById('signup-lastname').value.trim();
             const terms = document.getElementById('signup-terms').checked;
 
-        // Clear previous errors
-        form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
-        form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
+            // console.log('Form values:', { email, phone, firstName, lastName, terms });
 
-        let isValid = true;
+            // Clear previous errors
+            form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+            form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
 
-        // Validate email
-        if (!email) {
-            showFieldError(document.getElementById('signup-email'), 'Email is required');
-            isValid = false;
-        } else if (!validateEmail(email)) {
-            showFieldError(document.getElementById('signup-email'), 'Please enter a valid email address');
-            isValid = false;
-        }
+            let isValid = true;
 
-        // Validate phone
-        const country = getCountryFromDomain();
-        let phoneErrorMessage = 'Please enter a valid mobile number';
-        
-        // Country-specific error messages
-        switch (country) {
-            case 'AU':
-                phoneErrorMessage = 'Please enter a valid Australian mobile number (e.g., 04XX XXX XXX)';
-                break;
-            case 'USA':
-                phoneErrorMessage = 'Please enter a valid US phone number (e.g., (XXX) XXX-XXXX)';
-                break;
-            case 'SG':
-                phoneErrorMessage = 'Please enter a valid Singapore mobile number (8 digits starting with 6, 8, or 9)';
-                break;
-            case 'NZ':
-                phoneErrorMessage = 'Please enter a valid New Zealand mobile number (8-9 digits)';
-                break;
-            case 'IN':
-                phoneErrorMessage = 'Please enter a valid Indian mobile number (10 digits starting with 6-9)';
-                break;
-        }
-        
-        if (!phone) {
-            showFieldError(document.getElementById('signup-phone'), 'Mobile number is required');
-            isValid = false;
-        } else if (!validatePhone(phone)) {
-            showFieldError(document.getElementById('signup-phone'), phoneErrorMessage);
-            isValid = false;
-        }
-
-        // Validate first name
-        if (!firstName) {
-            showFieldError(document.getElementById('signup-firstname'), 'First name is required');
-            isValid = false;
-        } else if (!validateName(firstName)) {
-            showFieldError(document.getElementById('signup-firstname'), 'First name must be at least 2 characters');
-            isValid = false;
-        }
-
-        // Validate last name
-        if (!lastName) {
-            showFieldError(document.getElementById('signup-lastname'), 'Last name is required');
-            isValid = false;
-        } else if (!validateName(lastName)) {
-            showFieldError(document.getElementById('signup-lastname'), 'Last name must be at least 2 characters');
-            isValid = false;
-        }
-
-        // Validate terms
-        if (!terms) {
-            const termsCheckbox = document.getElementById('signup-terms');
-            const errorSpan = termsCheckbox.closest('label').nextElementSibling;
-            if (errorSpan && errorSpan.classList.contains('error-message')) {
-                errorSpan.textContent = 'You must agree to the terms and conditions';
-                errorSpan.classList.remove('hidden');
+            // Validate email
+            if (!email) {
+                showFieldError(document.getElementById('signup-email'), 'Email is required');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showFieldError(document.getElementById('signup-email'), 'Please enter a valid email address');
+                isValid = false;
             }
-            isValid = false;
+
+            // Validate phone
+            const country = getCountryFromDomain();
+            let phoneErrorMessage = 'Please enter a valid mobile number';
+            
+            // Country-specific error messages
+            switch (country) {
+                case 'AU':
+                    phoneErrorMessage = 'Please enter a valid Australian mobile number (e.g., 04XX XXX XXX)';
+                    break;
+                case 'USA':
+                    phoneErrorMessage = 'Please enter a valid US phone number (e.g., (XXX) XXX-XXXX)';
+                    break;
+                case 'SG':
+                    phoneErrorMessage = 'Please enter a valid Singapore mobile number (8 digits starting with 6, 8, or 9)';
+                    break;
+                case 'NZ':
+                    phoneErrorMessage = 'Please enter a valid New Zealand mobile number (8-9 digits)';
+                    break;
+                case 'IN':
+                    phoneErrorMessage = 'Please enter a valid Indian mobile number (10 digits starting with 6-9)';
+                    break;
+            }
+            
+            if (!phone) {
+                showFieldError(document.getElementById('signup-phone'), 'Mobile number is required');
+                isValid = false;
+            } else if (!validatePhone(phone)) {
+                showFieldError(document.getElementById('signup-phone'), phoneErrorMessage);
+                isValid = false;
+            }
+
+            // Validate first name
+            if (!firstName) {
+                showFieldError(document.getElementById('signup-firstname'), 'First name is required');
+                isValid = false;
+            } else if (!validateName(firstName)) {
+                showFieldError(document.getElementById('signup-firstname'), 'First name must be at least 2 characters');
+                isValid = false;
+            }
+
+            // Validate last name
+            if (!lastName) {
+                showFieldError(document.getElementById('signup-lastname'), 'Last name is required');
+                isValid = false;
+            } else if (!validateName(lastName)) {
+                showFieldError(document.getElementById('signup-lastname'), 'Last name must be at least 2 characters');
+                isValid = false;
+            }
+
+            // Validate terms
+            if (!terms) {
+                const termsCheckbox = document.getElementById('signup-terms');
+                const errorSpan = termsCheckbox.closest('label').nextElementSibling;
+                if (errorSpan && errorSpan.classList.contains('error-message')) {
+                    errorSpan.textContent = 'You must agree to the terms and conditions';
+                    errorSpan.classList.remove('hidden');
+                }
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showFormMessage('Please correct the errors above', 'error');
+                return false;
+            }
+
+                // Get product RRP
+                // console.log('Getting RRP for product ID:', selectedProductId);
+                let rrp;
+                try {
+                    if (typeof getRRP !== 'function') {
+                        throw new Error('getRRP function not available');
+                    }
+                    rrp = getRRP(parseInt(selectedProductId));
+                    // console.log('RRP retrieved:', rrp);
+                } catch (error) {
+                    // console.error('Error getting RRP:', error);
+                    alert('Error getting product price. Product ID: ' + selectedProductId);
+                    rrp = null;
+                }
+                
+                if (!rrp) {
+                    const errorMsg = 'Invalid product selected. Please try again. Product ID: ' + selectedProductId;
+                    // console.error('Invalid RRP for product ID:', selectedProductId);
+                    alert(errorMsg);
+                    showFormMessage(errorMsg, 'error');
+                    return false;
+                }
+
+                // Get Facebook pixel
+                let pixel;
+                try {
+                    pixel = getFacebookPixel();
+                    // console.log('Facebook pixel retrieved:', pixel);
+                    if (!pixel || pixel === 'xxxxx') {
+                        // console.warn('Facebook pixel not found, using default value');
+                    }
+                } catch (error) {
+                    // console.error('Error getting Facebook pixel:', error);
+                    pixel = 'xxxxx';
+                }
+
+                // Get dealer ID and campaign
+                const dealerId = DEALER_ID || 533;
+                const campaign = CAMPAIGN_NAME || 'joinassure';
+                
+                // console.log('Building URL with:', {
+                //     email, firstName, lastName, phone,
+                //     productId: selectedProductId,
+                //     rrp, dealerId, campaign, pixel
+                // });
+
+                // Build URL
+                const params = new URLSearchParams({
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone: phone,
+                    productId: selectedProductId,
+                    rrp: rrp,
+                    iddealer: dealerId,
+                    campaign: campaign,
+                    pixel: pixel
+                });
+
+                const redirectUrl = `http://my.assurescratchanddent.com.au/signup?${params.toString()}`;
+
+                // Disable submit button
+                const btn = document.getElementById('signupSubmit');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+                }
+
+                // Log for debugging
+                // console.log('=== REDIRECT URL GENERATED ===');
+                // console.log('Full URL:', redirectUrl);
+                // console.log('Product ID in URL:', selectedProductId);
+                // alert('Redirecting to: ' + redirectUrl);
+
+                // Small delay to ensure button state updates, then open in new tab
+                setTimeout(() => {
+                    // console.log('Opening in new tab:', redirectUrl);
+                    // window.open(redirectUrl, '_blank');
+                    window.location.href = redirectUrl;
+                    
+                    // Close the modal after opening the new tab
+                    setTimeout(() => {
+                        if (MicroModal && typeof MicroModal.close === 'function') {
+                            MicroModal.close('signupModal');
+                        }
+                    }, 500);
+                }, 150);
+                
+                return false; // Prevent default form submission
+            } catch (error) {
+                // console.error('Error in form submission:', error);
+                alert('An error occurred: ' + error.message);
+                showFormMessage('An error occurred. Please try again.', 'error');
+                return false;
+            }
         }
 
-        if (!isValid) {
-            showFormMessage('Please correct the errors above', 'error');
-            return;
-        }
-
-        // Get product RRP
-        const rrp = getRRP(parseInt(selectedProductId));
-        if (!rrp) {
-            showFormMessage('Invalid product selected. Please try again.', 'error');
-            return;
-        }
-
-        // Get Facebook pixel
-        const pixel = getFacebookPixel();
-
-        // Build URL
-        const params = new URLSearchParams({
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-            productId: selectedProductId,
-            rrp: rrp,
-            iddealer: DEALER_ID,
-            campaign: CAMPAIGN_NAME,
-            pixel: pixel
-        });
-
-        const redirectUrl = `http://my.assurescratchanddent.com.au/signup?${params.toString()}`;
-
-        // Disable submit button
-        const submitBtn = document.getElementById('signupSubmit');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
-        }
-
-        // Log for debugging
-        console.log('Redirecting to:', redirectUrl);
-
-        // Small delay to ensure button state updates, then redirect
-        // Use window.location.replace to prevent back button issues
-        setTimeout(() => {
-            window.location.replace(redirectUrl);
-        }, 150);
-        });
+        // Attach handler to form submit event
+        form.addEventListener('submit', handleFormSubmit, false);
+        // console.log('Form submit listener attached');
+        
+        // ALSO attach handler directly to button click as fallback
+        submitBtn.addEventListener('click', function(e) {
+            // console.log('=== BUTTON CLICKED DIRECTLY ===');
+            e.preventDefault();
+            e.stopPropagation();
+            handleFormSubmit(e);
+        }, false);
+        // console.log('Button click listener attached');
     }
 
     // Initialize form handler when DOM is ready
