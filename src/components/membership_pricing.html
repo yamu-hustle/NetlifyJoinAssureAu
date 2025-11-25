@@ -525,7 +525,8 @@
         // Small delay to ensure button state updates, then redirect
         // Use window.location.replace to prevent back button issues
         setTimeout(() => {
-            window.location.replace(redirectUrl);
+           alert("redirecting to: " + redirectUrl);
+            //window.location.replace(redirectUrl);
         }, 150);
         });
     }
