@@ -49,7 +49,7 @@
                     </div>
                     <p class="text-sm lg:text-base text-green-600 font-semibold mb-2">SAVE 10%</p>
                     <p class="text-sm lg:text-base text-gray-600 mb-4">Equal to $40.50 p/m</p>
-                    <a href="https://my.assurescratchanddent.com.au/signup?key=21&token=B1OSFLcTtn/vhLi3ABmAzw==&campign=joinassureau" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white">
+                    <a data-productId="32" data-mm-target="signupModal" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white cursor-pointer">
                         Sign-up
                     </a>
                 </div>
@@ -58,7 +58,7 @@
                 <div class="bg-white rounded-xl p-6 shadow-lg">
                     <p class="text-base lg:text-lg mb-3 font-semibold">Pay Monthly – $45 p/m</p>
                     <p class="text-sm lg:text-base text-gray-600 mb-4">12 Month minimum – $540 total.</p>
-                    <a href="https://my.assurescratchanddent.com.au/signup?key=30&token=/dJyAbdfPgbz90jqvEhTzQ==&source=stripe&media=joinassureau&campaign=joinassureau" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white">
+                    <a data-productId="33" data-mm-target="signupModal" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white cursor-pointer">
                         Sign-up
                     </a>
                 </div>
@@ -85,7 +85,7 @@
                     </div>
                     <p class="text-sm lg:text-base text-green-600 font-semibold mb-2">SAVE 10%</p>
                     <p class="text-sm lg:text-base text-gray-600 mb-4">Equal to $31.50 p/m</p>
-                    <a href="https://my.assurescratchanddent.com.au/signup?key=23&token=lwZkbnkO/PVX+Xu9BZe2Bg==&source=stripe&media=joinassureau&campaign=joinassureau" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white">
+                    <a data-productId="34" data-mm-target="signupModal" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white cursor-pointer">
                         Sign-up
                     </a>
                 </div>
@@ -94,7 +94,7 @@
                 <div class="bg-white rounded-xl p-6 shadow-lg">
                     <p class="text-base lg:text-lg mb-3 font-semibold">Pay Monthly – $35 p/m</p>
                     <p class="text-sm lg:text-base text-gray-600 mb-4">12 Month minimum – $420 total.</p>
-                    <a href="https://my.assurescratchanddent.com.au/signup?key=29&token=4Epwrwy+IU1PQvbKqo7jJA==&source=stripe&media=joinassureau&campaign=joinassureau" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white">
+                    <a data-productId="35" data-mm-target="signupModal" class="signup-button inline-block w-full text-center px-4 py-3 rounded-lg font-semibold text-white cursor-pointer">
                         Sign-up
                     </a>
                 </div>
@@ -102,4 +102,416 @@
         </div>
     </div>
 </div>
+
+<!-- Signup Modal -->
+<div class="fixed z-[999] h-screen w-full left-0 top-0 opacity-0 pointer-events-none overflow-auto bg-black/80 hidden transition-opacity duration-300 group/modal group-[.ready]/body:block [&.is-open]:opacity-100 [&.is-open]:pointer-events-auto" id="signupModal" role="dialog" aria-labelledby="signupModal" aria-hidden="true">
+    <div tabindex="-1" data-mm-dismiss class="w-full h-full">
+        <div role="dialog" aria-modal="true" aria-labelledby="signupModal-title" class="h-full px-4 py-8 lg:py-10 flex justify-center items-center">
+            <div id="signupModal-content" class="m-auto w-full text-center max-w-xl bg-white translate-y-8 transition-transform duration-300 px-5 pt-10 pb-6 md:px-10 md:py-10 motion-reduce:transition-none group-[.is-open]/modal:translate-y-0 rounded-lg">
+                <span data-mm-dismiss class="block text-black absolute top-4 right-4 md:top-5 md:right-5 cursor-pointer w-4">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto pointer-events-none">
+                        <path d="M16.7071 1.70711C17.0976 1.31658 17.0976 0.683417 16.7071 0.292893C16.3166 -0.0976311 15.6834 -0.0976311 15.2929 0.292893L16.7071 1.70711ZM0.292893 15.2929C-0.0976311 15.6834 -0.0976311 16.3166 0.292893 16.7071C0.683417 17.0976 1.31658 17.0976 1.70711 16.7071L0.292893 15.2929ZM1.70711 0.292893C1.31658 -0.0976311 0.683417 -0.0976311 0.292893 0.292893C-0.0976311 0.683417 -0.0976311 1.31658 0.292893 1.70711L1.70711 0.292893ZM15.2929 16.7071C15.6834 17.0976 16.3166 17.0976 16.7071 16.7071C17.0976 16.3166 17.0976 15.6834 16.7071 15.2929L15.2929 16.7071ZM15.2929 0.292893L0.292893 15.2929L1.70711 16.7071L16.7071 1.70711L15.2929 0.292893ZM0.292893 1.70711L15.2929 16.7071L16.7071 15.2929L1.70711 0.292893L0.292893 1.70711Z" fill="black" />
+                    </svg>
+                </span>
+
+                <div class="lg:text-xl">
+                    <h3 id="signupModal-title" class="text-2xl lg:text-3xl font-bold leading-tight mb-5">
+                        Sign Up
+                    </h3>
+
+                    <form id="signupForm" class="text-left">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="signup-email">Email <span class="text-red-500">*</span></label>
+                            <input type="email" id="signup-email" name="email" class="text-base appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue" placeholder="Enter your email" required>
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="signup-phone">Mobile Number <span class="text-red-500">*</span></label>
+                            <input type="tel" id="signup-phone" name="phone" class="text-base appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue" placeholder="" required>
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="signup-firstname">First Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="signup-firstname" name="firstName" class="text-base appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue" placeholder="Enter your first name" required>
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="signup-lastname">Last Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="signup-lastname" name="lastName" class="text-base appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue" placeholder="Enter your last name" required>
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="flex items-start">
+                                <input type="checkbox" id="signup-terms" name="terms" class="mt-1 mr-2" required>
+                                <span class="text-sm text-gray-700">I agree to Assure Scratch and Dent <a href="/terms-and-conditions.pdf" target="_blank" class="text-blue underline">terms and conditions</a> <span class="text-red-500">*</span></span>
+                            </label>
+                            <span class="error-message text-red-500 text-sm hidden"></span>
+                        </div>
+
+                        <button type="submit" id="signupSubmit" class="signup-button w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition duration-300">
+                            Continue
+                        </button>
+
+                        <div id="signupFormMessages" class="form-messages mt-5 text-sm [&.error]:text-red-500 [&.success]:text-green-600 hidden"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { getRRP, DEALER_ID, CAMPAIGN_NAME } from '../assets/js/membership-config.js';
+    import MicroModal from 'micromodal';
+
+    // Get Facebook Pixel data from cookies
+    function getFacebookPixel() {
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        // Get Facebook Browser ID (_fbp) - used for browser-based tracking
+        const fbp = getCookie('_fbp');
+        // Get Facebook Click ID (_fbc) - used for click-based tracking from ads
+        const fbc = getCookie('_fbc');
+        
+        // Prefer _fbc if available (more specific for ad clicks), otherwise use _fbp
+        const pixelValue = fbc || fbp;
+        return pixelValue ? encodeURIComponent(pixelValue) : 'xxxxx';
+    }
+
+    // Store selected product ID
+    let selectedProductId = null;
+
+    // Detect country based on domain
+    function getCountryFromDomain() {
+        const hostname = window.location.hostname.toLowerCase();
+        if (hostname.includes('.com.au')) return 'AU';
+        if (hostname.includes('.sg')) return 'SG';
+        if (hostname.includes('.co.nz')) return 'NZ';
+        if (hostname.includes('.in')) return 'IN';
+        if (hostname.includes('.com')) return 'USA';
+        // Default to AU if not detected
+        return 'AU';
+    }
+
+    // Get country-specific phone placeholder
+    function getPhonePlaceholder() {
+        const country = getCountryFromDomain();
+        switch (country) {
+            case 'AU':
+                return '04XX XXX XXX';
+            case 'USA':
+                return '(XXX) XXX-XXXX';
+            case 'SG':
+                return '8XXXXXXX';
+            case 'NZ':
+                return '02X XXX XXXX';
+            case 'IN':
+                return '9XXXXXXXXX';
+            default:
+                return 'Enter your mobile number';
+        }
+    }
+
+    // Wait for DOM to be ready
+    function initSignupModal() {
+        // Set phone placeholder based on country
+        const phoneInput = document.getElementById('signup-phone');
+        if (phoneInput) {
+            phoneInput.placeholder = getPhonePlaceholder();
+        }
+        
+        // Handle signup button clicks
+        document.querySelectorAll('[data-mm-target="signupModal"]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedProductId = button.getAttribute('data-productId');
+                
+                // Reset form when opening modal
+                const form = document.getElementById('signupForm');
+                if (form) {
+                    form.reset();
+                    form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+                    form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
+                    const messageDiv = document.getElementById('signupFormMessages');
+                    if (messageDiv) messageDiv.classList.add('hidden');
+                    
+                    // Update phone placeholder
+                    const phoneField = document.getElementById('signup-phone');
+                    if (phoneField) {
+                        phoneField.placeholder = getPhonePlaceholder();
+                    }
+                }
+                
+                // Open modal using MicroModal
+                MicroModal.show('signupModal', {
+                    openTrigger: 'data-mm-target',
+                    closeTrigger: 'data-mm-dismiss',
+                    openClass: 'is-open',
+                    onShow: () => {
+                        document.body.classList.add('overflow-hidden');
+                    },
+                    onClose: () => {
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                });
+            });
+        });
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSignupModal);
+    } else {
+        initSignupModal();
+    }
+
+    // Validation functions
+    function validateEmail(email) {
+        const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        return re.test(email);
+    }
+
+    function validatePhone(phone) {
+        const country = getCountryFromDomain();
+        // Remove spaces, dashes, and parentheses for validation
+        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        
+        switch (country) {
+            case 'AU': // Australia
+                // Australian phone: 10 digits, can start with 0 or +61
+                // Mobile: 04XX XXX XXX (10 digits)
+                // Landline: (02) XXXX XXXX or (03-08) XXXX XXXX
+                return /^(\+61|0)?[2-478]\d{8}$/.test(cleaned) && cleaned.replace(/^\+61|^0/, '').length === 9;
+            
+            case 'USA': // United States
+                // US phone: 10 digits, can have +1 prefix
+                // Format: (XXX) XXX-XXXX or XXX-XXX-XXXX
+                const usCleaned = cleaned.replace(/^\+1/, '');
+                return /^\d{10}$/.test(usCleaned);
+            
+            case 'SG': // Singapore
+                // Singapore phone: 8 digits, can start with +65
+                // Mobile: 8XXXXXXX or 9XXXXXXX
+                const sgCleaned = cleaned.replace(/^\+65/, '');
+                return /^[689]\d{7}$/.test(sgCleaned) && sgCleaned.length === 8;
+            
+            case 'NZ': // New Zealand
+                // New Zealand phone: 8-9 digits, can start with 0 or +64
+                // Mobile: 02X XXX XXXX (9 digits) or 2X XXX XXXX (8 digits)
+                // Landline: 0X XXXX XXXX (9 digits)
+                const nzCleaned = cleaned.replace(/^\+64|^0/, '');
+                return /^[2-9]\d{7,8}$/.test(nzCleaned) && (nzCleaned.length === 8 || nzCleaned.length === 9);
+            
+            case 'IN': // India
+                // Indian phone: 10 digits, can start with +91 or 0
+                // Mobile: 6-9 followed by 9 digits
+                const inCleaned = cleaned.replace(/^\+91|^0/, '');
+                return /^[6-9]\d{9}$/.test(inCleaned) && inCleaned.length === 10;
+            
+            default:
+                // Fallback: basic validation
+                return cleaned.length >= 8 && /^\d+$/.test(cleaned);
+        }
+    }
+
+    function validateName(name) {
+        return name.trim().length >= 2;
+    }
+
+    function showFieldError(field, message) {
+        const errorSpan = field.parentElement.querySelector('.error-message');
+        if (errorSpan) {
+            errorSpan.textContent = message;
+            errorSpan.classList.remove('hidden');
+        }
+        field.classList.add('border-red-500');
+    }
+
+    function clearFieldError(field) {
+        const errorSpan = field.parentElement.querySelector('.error-message');
+        if (errorSpan) {
+            errorSpan.classList.add('hidden');
+        }
+        field.classList.remove('border-red-500');
+    }
+
+    function showFormMessage(message, type) {
+        const messageDiv = document.getElementById('signupFormMessages');
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.className = `form-messages mt-5 text-sm ${type === 'error' ? 'text-red-500' : 'text-green-600'} hidden`;
+            messageDiv.classList.remove('hidden');
+        }
+    }
+
+    // Form submission handler - wait for form to exist
+    function initFormHandler() {
+        const form = document.getElementById('signupForm');
+        if (!form) {
+            setTimeout(initFormHandler, 100);
+            return;
+        }
+
+        form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const form = e.target;
+        const email = document.getElementById('signup-email').value.trim();
+        const phone = document.getElementById('signup-phone').value.trim();
+        const firstName = document.getElementById('signup-firstname').value.trim();
+        const lastName = document.getElementById('signup-lastname').value.trim();
+        const terms = document.getElementById('signup-terms').checked;
+
+        // Clear previous errors
+        form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+        form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
+
+        let isValid = true;
+
+        // Validate email
+        if (!email) {
+            showFieldError(document.getElementById('signup-email'), 'Email is required');
+            isValid = false;
+        } else if (!validateEmail(email)) {
+            showFieldError(document.getElementById('signup-email'), 'Please enter a valid email address');
+            isValid = false;
+        }
+
+        // Validate phone
+        const country = getCountryFromDomain();
+        let phoneErrorMessage = 'Please enter a valid mobile number';
+        
+        // Country-specific error messages
+        switch (country) {
+            case 'AU':
+                phoneErrorMessage = 'Please enter a valid Australian mobile number (e.g., 04XX XXX XXX)';
+                break;
+            case 'USA':
+                phoneErrorMessage = 'Please enter a valid US phone number (e.g., (XXX) XXX-XXXX)';
+                break;
+            case 'SG':
+                phoneErrorMessage = 'Please enter a valid Singapore mobile number (8 digits starting with 6, 8, or 9)';
+                break;
+            case 'NZ':
+                phoneErrorMessage = 'Please enter a valid New Zealand mobile number (8-9 digits)';
+                break;
+            case 'IN':
+                phoneErrorMessage = 'Please enter a valid Indian mobile number (10 digits starting with 6-9)';
+                break;
+        }
+        
+        if (!phone) {
+            showFieldError(document.getElementById('signup-phone'), 'Mobile number is required');
+            isValid = false;
+        } else if (!validatePhone(phone)) {
+            showFieldError(document.getElementById('signup-phone'), phoneErrorMessage);
+            isValid = false;
+        }
+
+        // Validate first name
+        if (!firstName) {
+            showFieldError(document.getElementById('signup-firstname'), 'First name is required');
+            isValid = false;
+        } else if (!validateName(firstName)) {
+            showFieldError(document.getElementById('signup-firstname'), 'First name must be at least 2 characters');
+            isValid = false;
+        }
+
+        // Validate last name
+        if (!lastName) {
+            showFieldError(document.getElementById('signup-lastname'), 'Last name is required');
+            isValid = false;
+        } else if (!validateName(lastName)) {
+            showFieldError(document.getElementById('signup-lastname'), 'Last name must be at least 2 characters');
+            isValid = false;
+        }
+
+        // Validate terms
+        if (!terms) {
+            const termsCheckbox = document.getElementById('signup-terms');
+            const errorSpan = termsCheckbox.closest('label').nextElementSibling;
+            if (errorSpan && errorSpan.classList.contains('error-message')) {
+                errorSpan.textContent = 'You must agree to the terms and conditions';
+                errorSpan.classList.remove('hidden');
+            }
+            isValid = false;
+        }
+
+        if (!isValid) {
+            showFormMessage('Please correct the errors above', 'error');
+            return;
+        }
+
+        // Get product RRP
+        const rrp = getRRP(parseInt(selectedProductId));
+        if (!rrp) {
+            showFormMessage('Invalid product selected. Please try again.', 'error');
+            return;
+        }
+
+        // Get Facebook pixel
+        const pixel = getFacebookPixel();
+
+        // Build URL
+        const params = new URLSearchParams({
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+            productId: selectedProductId,
+            rrp: rrp,
+            iddealer: DEALER_ID,
+            campaign: CAMPAIGN_NAME,
+            pixel: pixel
+        });
+
+        const redirectUrl = `http://my.assurescratchanddent.com.au/signup?${params.toString()}`;
+
+        // Disable submit button
+        const submitBtn = document.getElementById('signupSubmit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+
+        // Redirect to the generated URL
+        window.location.href = redirectUrl;
+        });
+    }
+
+    // Initialize form handler when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFormHandler);
+    } else {
+        initFormHandler();
+    }
+
+    // Clear errors on input - wait for form to exist
+    function initInputHandlers() {
+        const form = document.getElementById('signupForm');
+        if (!form) {
+            setTimeout(initInputHandlers, 100);
+            return;
+        }
+
+        form.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                clearFieldError(input);
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initInputHandlers);
+    } else {
+        initInputHandlers();
+    }
+</script>
 
