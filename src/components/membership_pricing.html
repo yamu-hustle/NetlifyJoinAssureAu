@@ -153,7 +153,7 @@
                             <span class="error-message text-red-500 text-sm hidden"></span>
                         </div>
 
-                        <button type="submit" id="signupSubmit" class="signup-button w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition duration-300">
+                        <button type="button" id="signupSubmit" class="signup-button w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition duration-300">
                             Continue
                         </button>
 
@@ -169,11 +169,45 @@
     // IMMEDIATE LOG - Script is loading
     console.log('🚀 MEMBERSHIP PRICING SCRIPT LOADING...');
     console.log('Script location:', window.location.href);
+    console.log('Current pathname:', window.location.pathname);
     
-    import { getRRP, DEALER_ID, CAMPAIGN_NAME } from '../assets/js/membership-config.js';
+    // Import path - use relative path from component
+    // In dev: resolves from src/components/ to src/assets/js/
+    // In production: Vite should process and resolve this during build
+    let getRRP, DEALER_ID, CAMPAIGN_NAME;
     
-    // IMMEDIATE LOG - Imports loaded
-    console.log('✅ Imports loaded successfully');
+    try {
+        const configModule = await import('../assets/js/membership-config.js');
+        getRRP = configModule.getRRP;
+        DEALER_ID = configModule.DEALER_ID;
+        CAMPAIGN_NAME = configModule.CAMPAIGN_NAME;
+        console.log('✅ Imports loaded successfully via dynamic import');
+        console.log('DEALER_ID:', DEALER_ID);
+        console.log('CAMPAIGN_NAME:', CAMPAIGN_NAME);
+        console.log('getRRP type:', typeof getRRP);
+    } catch (importError) {
+        console.error('❌ CRITICAL: Failed to import membership-config.js');
+        console.error('Import error:', importError);
+        console.error('Error message:', importError.message);
+        console.error('Error stack:', importError.stack);
+        
+        // Try alternative path as fallback
+        try {
+            console.log('🔄 Trying alternative import path...');
+            const configModule = await import('/assets/js/membership-config.js');
+            getRRP = configModule.getRRP;
+            DEALER_ID = configModule.DEALER_ID;
+            CAMPAIGN_NAME = configModule.CAMPAIGN_NAME;
+            console.log('✅ Imports loaded successfully via fallback path');
+        } catch (fallbackError) {
+            console.error('❌ Fallback import also failed:', fallbackError);
+            // Set defaults to prevent complete failure
+            getRRP = () => null;
+            DEALER_ID = 533;
+            CAMPAIGN_NAME = 'joinassure';
+            console.warn('⚠️ Using default values - form may not work correctly');
+        }
+    }
     
     // ============================================
     // DEBUG FLAG - Set to false to disable all debugging logs
@@ -586,10 +620,12 @@
             debugLog('Event:', e);
             debugLog('Event type:', e ? e.type : 'no event');
             
+            // Always prevent default and stop propagation
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
+                console.log('✅ Event prevented and stopped');
                 debugLog('Event prevented and stopped');
             }
             
@@ -644,8 +680,23 @@
             form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
             form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
 
+            // First, check HTML5 native validation (required fields, email format, etc.)
+            console.log('🔍 Checking HTML5 form validation...');
+            debugLog('=== CHECKING HTML5 VALIDATION ===');
+            
+            if (!form.checkValidity()) {
+                // HTML5 validation failed - show browser's native validation messages
+                console.warn('⚠️ HTML5 validation failed, showing native validation messages');
+                debugWarn('⚠️ HTML5 validation failed');
+                form.reportValidity(); // This shows the browser's native validation messages
+                return false;
+            }
+            
+            console.log('✅ HTML5 validation passed, proceeding with custom validation');
+            debugLog('✅ HTML5 validation passed');
+
             let isValid = true;
-            debugLog('=== STARTING VALIDATION ===');
+            debugLog('=== STARTING CUSTOM VALIDATION ===');
 
             // Validate email
             debugLog('Validating email...');
@@ -899,32 +950,48 @@
             }
         }
 
-        // Attach handler to form submit event
+        // Attach handler to form submit event (with capture to catch early)
         debugLog('=== ATTACHING EVENT LISTENERS ===');
         debugLog('Form element:', form);
         debugLog('Submit button element:', submitBtn);
         
+        // Prevent form submission - attach with capture phase to run first
         form.addEventListener('submit', function(e) {
+            // IMMEDIATE LOG - Always show form submit
+            console.log('🔵 FORM SUBMIT EVENT TRIGGERED');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             debugLog('🔵 FORM SUBMIT EVENT TRIGGERED');
             handleFormSubmit(e);
-        }, false);
-        debugLog('✅ Form submit listener attached');
+            return false;
+        }, true); // Use capture phase to run before other handlers
         
-        // ALSO attach handler directly to button click as fallback
+        debugLog('✅ Form submit listener attached (with capture)');
+        
+        // Attach handler directly to button click (primary handler)
         submitBtn.addEventListener('click', function(e) {
             // IMMEDIATE LOG - Always show button clicks
             console.log('🔵🔵🔵 BUTTON CLICKED DIRECTLY 🔵🔵🔵');
             console.log('Click event type:', e.type);
             console.log('Button element:', submitBtn);
             console.log('Button disabled:', submitBtn.disabled);
+            console.log('Button type:', submitBtn.type);
             
             debugLog('🔵🔵🔵 BUTTON CLICKED DIRECTLY 🔵🔵🔵');
             debugLog('Click event:', e);
             debugLog('Button element:', submitBtn);
+            
+            // Prevent any default behavior
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Call handler
             handleFormSubmit(e);
-        }, false);
+            
+            return false;
+        }, true); // Use capture phase
         
         // IMMEDIATE LOG - Always confirm listener attached
         console.log('✅ Button click listener attached to:', submitBtn.id);
