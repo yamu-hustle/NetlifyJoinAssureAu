@@ -168,6 +168,30 @@
 <script type="module">
     import { getRRP, DEALER_ID, CAMPAIGN_NAME } from '../assets/js/membership-config.js';
     
+    // ============================================
+    // DEBUG FLAG - Set to false to disable all debugging logs
+    // ============================================
+    const DEBUG = false; // Change to true to enable debugging
+    
+    // Debug logging helper function
+    const debugLog = (...args) => {
+        if (DEBUG) {
+            console.log(...args);
+        }
+    };
+    
+    const debugWarn = (...args) => {
+        if (DEBUG) {
+            console.warn(...args);
+        }
+    };
+    
+    const debugError = (...args) => {
+        if (DEBUG) {
+            console.error(...args);
+        }
+    };
+    
     // Import MicroModal from CDN (works in browser without bundler)
     let MicroModal;
     let microModalLoaded = false;
@@ -188,7 +212,7 @@
     }
     
     // Log that imports are loaded
-    console.log('Imports loaded:', { DEALER_ID, CAMPAIGN_NAME, getRRP: typeof getRRP, MicroModal: typeof MicroModal });
+    debugLog('Imports loaded:', { DEALER_ID, CAMPAIGN_NAME, getRRP: typeof getRRP, MicroModal: typeof MicroModal });
 
     // Get Facebook Pixel data from cookies
     function getFacebookPixel() {
@@ -205,7 +229,7 @@
             // Get Facebook Click ID (_fbc) - used for click-based tracking from ads
             const fbc = getCookie('_fbc');
             
-            console.log('Facebook cookies:', { fbp, fbc });
+            debugLog('Facebook cookies:', { fbp, fbc });
             
             // Prefer _fbc if available (more specific for ad clicks), otherwise use _fbp
             const pixelValue = fbc || fbp;
@@ -328,15 +352,24 @@
                         
                         // Ensure form handler is initialized when modal opens
                         setTimeout(() => {
-                            // console.log('Modal opened, initializing form handler...');
+                            debugLog('=== MODAL OPENED - CHECKING FORM ELEMENTS ===');
                             
                             // Test if form and button exist
                             const testForm = document.getElementById('signupForm');
                             const testBtn = document.getElementById('signupSubmit');
-                            // console.log('After modal open - Form exists:', !!testForm, 'Button exists:', !!testBtn);
+                            debugLog('After modal open - Form exists:', !!testForm);
+                            debugLog('After modal open - Button exists:', !!testBtn);
+                            debugLog('Form handler initialized flag:', formHandlerInitialized);
                             
-                            // Initialize form handler (will skip if already initialized)
-                            initFormHandler();
+                            if (testForm && testBtn) {
+                                debugLog('✅ Form elements found in modal, ensuring handler is initialized');
+                                // Initialize form handler (will skip if already initialized)
+                                initFormHandler();
+                            } else {
+                                debugError('❌ Form elements NOT found in modal!');
+                                debugError('Form:', testForm);
+                                debugError('Button:', testBtn);
+                            }
                             
                             // Ensure button is still reset after handler initialization
                             if (testBtn) {
@@ -478,68 +511,121 @@
     // Form submission handler - wait for form to exist
     let formHandlerInitialized = false;
     function initFormHandler() {
+        debugLog('=== INIT FORM HANDLER CALLED ===');
+        debugLog('Document ready state:', document.readyState);
+        debugLog('Current time:', new Date().toISOString());
+        
         const form = document.getElementById('signupForm');
         const submitBtn = document.getElementById('signupSubmit');
         
+        debugLog('Form element found:', !!form, form);
+        debugLog('Submit button found:', !!submitBtn, submitBtn);
+        
         if (!form || !submitBtn) {
-            // console.log('Form or button not found, retrying...', { form: !!form, submitBtn: !!submitBtn });
+            debugWarn('⚠️ Form or button not found, retrying in 100ms...', { 
+                form: !!form, 
+                submitBtn: !!submitBtn,
+                formId: form ? form.id : 'not found',
+                buttonId: submitBtn ? submitBtn.id : 'not found'
+            });
             setTimeout(initFormHandler, 100);
             return;
         }
 
         // Prevent duplicate initialization
         if (formHandlerInitialized) {
+            debugLog('⚠️ Form handler already initialized, skipping...');
             return;
         }
         formHandlerInitialized = true;
 
-        // console.log('Form handler initialized successfully');
-        // console.log('Form element:', form);
-        // console.log('Submit button element:', submitBtn);
+        debugLog('✅ Form handler initialized successfully');
+        debugLog('Form element:', form);
+        debugLog('Form ID:', form.id);
+        debugLog('Submit button element:', submitBtn);
+        debugLog('Submit button ID:', submitBtn.id);
+        debugLog('Submit button type:', submitBtn.type);
+        debugLog('Submit button disabled:', submitBtn.disabled);
 
         // Function to handle form submission
         function handleFormSubmit(e) {
+            debugLog('=== FORM SUBMIT HANDLER CALLED ===');
+            debugLog('Event:', e);
+            debugLog('Event type:', e ? e.type : 'no event');
+            
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
+                debugLog('Event prevented and stopped');
             }
             
             try {
-                // console.log('=== FORM SUBMIT HANDLER CALLED ===');
-                
-                // console.log('Form submitted. Selected Product ID:', selectedProductId);
+                debugLog('=== STARTING FORM SUBMISSION ===');
+                debugLog('Selected Product ID:', selectedProductId);
+                debugLog('DEALER_ID:', DEALER_ID);
+                debugLog('CAMPAIGN_NAME:', CAMPAIGN_NAME);
+                debugLog('getRRP function available:', typeof getRRP);
+                debugLog('MicroModal available:', typeof MicroModal);
                 
                 // Check if product ID is set
                 if (!selectedProductId) {
                     const errorMsg = 'Error: No product selected. Please close and try again.';
-                    // console.error('No product ID selected!');
+                    debugError('❌ No product ID selected!');
                     alert(errorMsg);
                     showFormMessage(errorMsg, 'error');
                     return false;
                 }
+                debugLog('✅ Product ID check passed:', selectedProductId);
             
-            const email = document.getElementById('signup-email').value.trim();
-            const phone = document.getElementById('signup-phone').value.trim();
-            const firstName = document.getElementById('signup-firstname').value.trim();
-            const lastName = document.getElementById('signup-lastname').value.trim();
-            const terms = document.getElementById('signup-terms').checked;
+            debugLog('=== COLLECTING FORM VALUES ===');
+            const emailEl = document.getElementById('signup-email');
+            const phoneEl = document.getElementById('signup-phone');
+            const firstNameEl = document.getElementById('signup-firstname');
+            const lastNameEl = document.getElementById('signup-lastname');
+            const termsEl = document.getElementById('signup-terms');
+            
+            debugLog('Form elements found:', {
+                email: !!emailEl,
+                phone: !!phoneEl,
+                firstName: !!firstNameEl,
+                lastName: !!lastNameEl,
+                terms: !!termsEl
+            });
+            
+            const email = emailEl ? emailEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const firstName = firstNameEl ? firstNameEl.value.trim() : '';
+            const lastName = lastNameEl ? lastNameEl.value.trim() : '';
+            const terms = termsEl ? termsEl.checked : false;
 
-            // console.log('Form values:', { email, phone, firstName, lastName, terms });
+            debugLog('Form values collected:', { 
+                email: email ? email.substring(0, 3) + '***' : 'empty',
+                phone: phone ? phone.substring(0, 3) + '***' : 'empty',
+                firstName: firstName || 'empty',
+                lastName: lastName || 'empty',
+                terms: terms
+            });
 
             // Clear previous errors
             form.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
             form.querySelectorAll('input').forEach(input => input.classList.remove('border-red-500'));
 
             let isValid = true;
+            debugLog('=== STARTING VALIDATION ===');
 
             // Validate email
+            debugLog('Validating email...');
             if (!email) {
+                debugLog('❌ Email validation failed: empty');
                 showFieldError(document.getElementById('signup-email'), 'Email is required');
                 isValid = false;
             } else if (!validateEmail(email)) {
+                debugLog('❌ Email validation failed: invalid format');
                 showFieldError(document.getElementById('signup-email'), 'Please enter a valid email address');
                 isValid = false;
+            } else {
+                debugLog('✅ Email validation passed');
             }
 
             // Validate phone
@@ -565,34 +651,51 @@
                     break;
             }
             
+            debugLog('Validating phone...');
             if (!phone) {
+                debugLog('❌ Phone validation failed: empty');
                 showFieldError(document.getElementById('signup-phone'), 'Mobile number is required');
                 isValid = false;
             } else if (!validatePhone(phone)) {
+                debugLog('❌ Phone validation failed: invalid format');
                 showFieldError(document.getElementById('signup-phone'), phoneErrorMessage);
                 isValid = false;
+            } else {
+                debugLog('✅ Phone validation passed');
             }
 
             // Validate first name
+            debugLog('Validating first name...');
             if (!firstName) {
+                debugLog('❌ First name validation failed: empty');
                 showFieldError(document.getElementById('signup-firstname'), 'First name is required');
                 isValid = false;
             } else if (!validateName(firstName)) {
+                debugLog('❌ First name validation failed: too short');
                 showFieldError(document.getElementById('signup-firstname'), 'First name must be at least 2 characters');
                 isValid = false;
+            } else {
+                debugLog('✅ First name validation passed');
             }
 
             // Validate last name
+            debugLog('Validating last name...');
             if (!lastName) {
+                debugLog('❌ Last name validation failed: empty');
                 showFieldError(document.getElementById('signup-lastname'), 'Last name is required');
                 isValid = false;
             } else if (!validateName(lastName)) {
+                debugLog('❌ Last name validation failed: too short');
                 showFieldError(document.getElementById('signup-lastname'), 'Last name must be at least 2 characters');
                 isValid = false;
+            } else {
+                debugLog('✅ Last name validation passed');
             }
 
             // Validate terms
+            debugLog('Validating terms checkbox...');
             if (!terms) {
+                debugLog('❌ Terms validation failed: not checked');
                 const termsCheckbox = document.getElementById('signup-terms');
                 const errorSpan = termsCheckbox.closest('label').nextElementSibling;
                 if (errorSpan && errorSpan.classList.contains('error-message')) {
@@ -600,60 +703,84 @@
                     errorSpan.classList.remove('hidden');
                 }
                 isValid = false;
+            } else {
+                debugLog('✅ Terms validation passed');
             }
 
+            debugLog('=== VALIDATION COMPLETE ===');
+            debugLog('Form is valid:', isValid);
+            
             if (!isValid) {
+                debugError('❌ Form validation failed, stopping submission');
                 showFormMessage('Please correct the errors above', 'error');
                 return false;
             }
+            
+            debugLog('✅ All validations passed, proceeding with submission');
 
                 // Get product RRP
-                // console.log('Getting RRP for product ID:', selectedProductId);
+                debugLog('=== GETTING PRODUCT RRP ===');
+                debugLog('Product ID:', selectedProductId);
+                debugLog('getRRP function type:', typeof getRRP);
                 let rrp;
                 try {
                     if (typeof getRRP !== 'function') {
                         throw new Error('getRRP function not available');
                     }
                     rrp = getRRP(parseInt(selectedProductId));
-                    // console.log('RRP retrieved:', rrp);
+                    debugLog('✅ RRP retrieved:', rrp);
                 } catch (error) {
-                    // console.error('Error getting RRP:', error);
+                    debugError('❌ Error getting RRP:', error);
+                    debugError('Error stack:', error.stack);
                     alert('Error getting product price. Product ID: ' + selectedProductId);
                     rrp = null;
                 }
                 
                 if (!rrp) {
                     const errorMsg = 'Invalid product selected. Please try again. Product ID: ' + selectedProductId;
-                    // console.error('Invalid RRP for product ID:', selectedProductId);
+                    debugError('❌ Invalid RRP for product ID:', selectedProductId);
                     alert(errorMsg);
                     showFormMessage(errorMsg, 'error');
                     return false;
                 }
+                debugLog('✅ RRP check passed:', rrp);
 
                 // Get Facebook pixel
+                debugLog('=== GETTING FACEBOOK PIXEL ===');
                 let pixel;
                 try {
                     pixel = getFacebookPixel();
-                    // console.log('Facebook pixel retrieved:', pixel);
+                    debugLog('Facebook pixel retrieved:', pixel ? pixel.substring(0, 20) + '...' : 'empty');
                     if (!pixel || pixel === 'xxxxx') {
-                        // console.warn('Facebook pixel not found, using default value');
+                        debugWarn('⚠️ Facebook pixel not found, using default value');
                     }
                 } catch (error) {
-                    // console.error('Error getting Facebook pixel:', error);
+                    debugError('❌ Error getting Facebook pixel:', error);
                     pixel = 'xxxxx';
                 }
 
                 // Get dealer ID and campaign
+                debugLog('=== GETTING DEALER/CAMPAIGN INFO ===');
                 const dealerId = DEALER_ID || 533;
                 const campaign = CAMPAIGN_NAME || 'joinassure';
+                debugLog('Dealer ID:', dealerId);
+                debugLog('Campaign:', campaign);
                 
-                // console.log('Building URL with:', {
-                //     email, firstName, lastName, phone,
-                //     productId: selectedProductId,
-                //     rrp, dealerId, campaign, pixel
-                // });
+                debugLog('=== BUILDING URL PARAMETERS ===');
+                debugLog('URL data:', {
+                    email: email ? email.substring(0, 3) + '***' : 'empty',
+                    firstName: firstName || 'empty',
+                    lastName: lastName || 'empty',
+                    phone: phone ? phone.substring(0, 3) + '***' : 'empty',
+                    productId: selectedProductId,
+                    rrp: rrp,
+                    iddealer: dealerId,
+                    campaign: campaign,
+                    pixel: pixel ? pixel.substring(0, 10) + '...' : 'empty'
+                });
 
                 // Build URL
+                debugLog('Building URLSearchParams...');
                 const params = new URLSearchParams({
                     email: email,
                     firstName: firstName,
@@ -665,38 +792,74 @@
                     campaign: campaign,
                     pixel: pixel
                 });
+                debugLog('✅ URLSearchParams created:', params.toString());
 
                 const redirectUrl = `https://my.assurescratchanddent.com.au/signup?${params.toString()}`;
+                debugLog('=== REDIRECT URL GENERATED ===');
+                debugLog('Full URL:', redirectUrl);
+                debugLog('URL length:', redirectUrl.length);
 
                 // Disable submit button
+                debugLog('=== DISABLING SUBMIT BUTTON ===');
                 const btn = document.getElementById('signupSubmit');
                 if (btn) {
                     btn.disabled = true;
                     btn.textContent = 'Processing...';
+                    debugLog('✅ Submit button disabled');
+                } else {
+                    debugWarn('⚠️ Submit button not found!');
                 }
 
-                // Log for debugging
-                // console.log('=== REDIRECT URL GENERATED ===');
-                // console.log('Full URL:', redirectUrl);
-                // console.log('Product ID in URL:', selectedProductId);
-                // alert('Redirecting to: ' + redirectUrl);
-
                 // Small delay to ensure button state updates, then open in new tab
+                debugLog('=== SETTING TIMEOUT FOR REDIRECT ===');
                 setTimeout(() => {
-                    // console.log('Opening in new tab:', redirectUrl);
-                    window.open(redirectUrl, '_blank');
+                    debugLog('=== TIMEOUT FIRED - ATTEMPTING REDIRECT ===');
+                    debugLog('Redirect URL:', redirectUrl);
+                    debugLog('Window object:', typeof window);
+                    debugLog('window.open available:', typeof window.open);
                     
-                    // Close the modal after opening the new tab
-                    setTimeout(() => {
-                        if (MicroModal && typeof MicroModal.close === 'function') {
-                            MicroModal.close('signupModal');
+                    try {
+                        const newWindow = window.open(redirectUrl, '_blank');
+                        debugLog('window.open() called, returned:', newWindow);
+                        debugLog('newWindow type:', typeof newWindow);
+                        debugLog('newWindow closed:', newWindow ? newWindow.closed : 'N/A');
+                        
+                        // Check if popup was blocked
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                            // Popup was blocked, fall back to same-window navigation
+                            debugWarn('⚠️ Popup blocked, redirecting in same window');
+                            debugLog('Using window.location.href:', redirectUrl);
+                            window.location.href = redirectUrl;
+                            debugLog('✅ window.location.href set');
+                        } else {
+                            // Popup opened successfully, close the modal
+                            debugLog('✅ Redirect opened successfully in new tab');
+                            setTimeout(() => {
+                                debugLog('=== CLOSING MODAL ===');
+                                if (MicroModal && typeof MicroModal.close === 'function') {
+                                    debugLog('Closing modal with MicroModal.close()');
+                                    MicroModal.close('signupModal');
+                                    debugLog('✅ Modal close called');
+                                } else {
+                                    debugWarn('⚠️ MicroModal not available or close function missing');
+                                }
+                            }, 500);
                         }
-                    }, 500);
+                    } catch (redirectError) {
+                        debugError('❌ Error during redirect:', redirectError);
+                        debugError('Error stack:', redirectError.stack);
+                        alert('Error redirecting: ' + redirectError.message);
+                    }
                 }, 150);
                 
+                debugLog('=== FORM HANDLER COMPLETED SUCCESSFULLY ===');
                 return false; // Prevent default form submission
             } catch (error) {
-                // console.error('Error in form submission:', error);
+                debugError('❌❌❌ CRITICAL ERROR IN FORM SUBMISSION ❌❌❌');
+                debugError('Error message:', error.message);
+                debugError('Error stack:', error.stack);
+                debugError('Error name:', error.name);
+                debugError('Full error object:', error);
                 alert('An error occurred: ' + error.message);
                 showFormMessage('An error occurred. Please try again.', 'error');
                 return false;
@@ -704,17 +867,33 @@
         }
 
         // Attach handler to form submit event
-        form.addEventListener('submit', handleFormSubmit, false);
-        // console.log('Form submit listener attached');
+        debugLog('=== ATTACHING EVENT LISTENERS ===');
+        debugLog('Form element:', form);
+        debugLog('Submit button element:', submitBtn);
+        
+        form.addEventListener('submit', function(e) {
+            debugLog('🔵 FORM SUBMIT EVENT TRIGGERED');
+            handleFormSubmit(e);
+        }, false);
+        debugLog('✅ Form submit listener attached');
         
         // ALSO attach handler directly to button click as fallback
         submitBtn.addEventListener('click', function(e) {
-            // console.log('=== BUTTON CLICKED DIRECTLY ===');
+            debugLog('🔵🔵🔵 BUTTON CLICKED DIRECTLY 🔵🔵🔵');
+            debugLog('Click event:', e);
+            debugLog('Button element:', submitBtn);
             e.preventDefault();
             e.stopPropagation();
             handleFormSubmit(e);
         }, false);
-        // console.log('Button click listener attached');
+        debugLog('✅ Button click listener attached');
+        
+        // Also try mousedown as another fallback
+        submitBtn.addEventListener('mousedown', function(e) {
+            debugLog('🔵 Button mousedown event');
+        }, false);
+        
+        debugLog('=== ALL EVENT LISTENERS ATTACHED ===');
     }
 
     // Initialize form handler when DOM is ready
