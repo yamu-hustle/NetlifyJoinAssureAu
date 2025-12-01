@@ -178,6 +178,9 @@
     
     try {
         const configModule = await import('../assets/js/membership-config.js');
+        // Keep reference to the module to ensure closures work correctly
+        window.__membershipConfig = configModule;
+        
         getRRP = configModule.getRRP;
         DEALER_ID = configModule.DEALER_ID;
         CAMPAIGN_NAME = configModule.CAMPAIGN_NAME;
@@ -185,6 +188,25 @@
         console.log('DEALER_ID:', DEALER_ID);
         console.log('CAMPAIGN_NAME:', CAMPAIGN_NAME);
         console.log('getRRP type:', typeof getRRP);
+        console.log('getRRP function:', getRRP);
+        console.log('PRODUCT_CONFIG available:', !!configModule.PRODUCT_CONFIG);
+        if (configModule.PRODUCT_CONFIG) {
+            console.log('PRODUCT_CONFIG contents:', configModule.PRODUCT_CONFIG);
+            console.log('PRODUCT_CONFIG[32]:', configModule.PRODUCT_CONFIG[32]);
+            console.log('PRODUCT_CONFIG keys:', Object.keys(configModule.PRODUCT_CONFIG));
+            // Test the function directly from module
+            const testResultDirect = configModule.getRRP(32);
+            console.log('Test configModule.getRRP(32):', testResultDirect);
+            // Test the copied function
+            const testResultCopied = getRRP(32);
+            console.log('Test getRRP(32) copied:', testResultCopied);
+            
+            // If copied version doesn't work, use module reference
+            if (testResultCopied === null && testResultDirect !== null) {
+                console.warn('⚠️ Copied function lost closure, using module reference');
+                getRRP = (id) => configModule.getRRP(id);
+            }
+        }
     } catch (importError) {
         console.error('❌ CRITICAL: Failed to import membership-config.js');
         console.error('Import error:', importError);
@@ -803,6 +825,15 @@
             debugLog('✅ All validations passed, proceeding with submission');
 
                 // Get product RRP
+                console.log('=== GETTING PRODUCT RRP ===');
+                console.log('Product ID (raw):', selectedProductId);
+                console.log('Product ID type:', typeof selectedProductId);
+                const productIdNum = parseInt(selectedProductId);
+                console.log('Product ID (parsed):', productIdNum);
+                console.log('Product ID (parsed) type:', typeof productIdNum);
+                console.log('getRRP function type:', typeof getRRP);
+                console.log('getRRP function:', getRRP);
+                
                 debugLog('=== GETTING PRODUCT RRP ===');
                 debugLog('Product ID:', selectedProductId);
                 debugLog('getRRP function type:', typeof getRRP);
@@ -811,7 +842,21 @@
                     if (typeof getRRP !== 'function') {
                         throw new Error('getRRP function not available');
                     }
-                    rrp = getRRP(parseInt(selectedProductId));
+                    console.log('Calling getRRP with:', productIdNum);
+                    // Direct test - check if we can access PRODUCT_CONFIG
+                    console.log('Testing direct lookup - checking if 32 exists in config...');
+                    rrp = getRRP(productIdNum);
+                    console.log('getRRP returned:', rrp);
+                    console.log('RRP type:', typeof rrp);
+                    
+                    // If null, try to debug why
+                    if (rrp === null) {
+                        console.warn('⚠️ getRRP returned null for product ID:', productIdNum);
+                        console.warn('This means the product ID is not in PRODUCT_CONFIG');
+                        console.warn('Expected: 486 for product ID 32');
+                        // Try calling the function directly to see what happens
+                        console.log('Function toString:', getRRP.toString());
+                    }
                     debugLog('✅ RRP retrieved:', rrp);
                 } catch (error) {
                     debugError('❌ Error getting RRP:', error);
