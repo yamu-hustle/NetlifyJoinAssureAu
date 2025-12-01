@@ -174,37 +174,40 @@
     // Import path - use relative path from component
     // In dev: resolves from src/components/ to src/assets/js/
     // In production: Vite should process and resolve this during build
+    let configModule = null;
     let getRRP, DEALER_ID, CAMPAIGN_NAME;
     
     try {
-        const configModule = await import('../assets/js/membership-config.js');
+        configModule = await import('../assets/js/membership-config.js');
         // Keep reference to the module to ensure closures work correctly
         window.__membershipConfig = configModule;
         
-        getRRP = configModule.getRRP;
+        // Always use module reference directly to avoid closure issues
+        // Create a wrapper that always calls through the module
+        getRRP = (productId) => {
+            return configModule.getRRP(productId);
+        };
+        
         DEALER_ID = configModule.DEALER_ID;
         CAMPAIGN_NAME = configModule.CAMPAIGN_NAME;
+        
         console.log('✅ Imports loaded successfully via dynamic import');
         console.log('DEALER_ID:', DEALER_ID);
         console.log('CAMPAIGN_NAME:', CAMPAIGN_NAME);
         console.log('getRRP type:', typeof getRRP);
-        console.log('getRRP function:', getRRP);
         console.log('PRODUCT_CONFIG available:', !!configModule.PRODUCT_CONFIG);
+        
         if (configModule.PRODUCT_CONFIG) {
             console.log('PRODUCT_CONFIG contents:', configModule.PRODUCT_CONFIG);
             console.log('PRODUCT_CONFIG[32]:', configModule.PRODUCT_CONFIG[32]);
             console.log('PRODUCT_CONFIG keys:', Object.keys(configModule.PRODUCT_CONFIG));
-            // Test the function directly from module
-            const testResultDirect = configModule.getRRP(32);
-            console.log('Test configModule.getRRP(32):', testResultDirect);
-            // Test the copied function
-            const testResultCopied = getRRP(32);
-            console.log('Test getRRP(32) copied:', testResultCopied);
-            
-            // If copied version doesn't work, use module reference
-            if (testResultCopied === null && testResultDirect !== null) {
-                console.warn('⚠️ Copied function lost closure, using module reference');
-                getRRP = (id) => configModule.getRRP(id);
+            // Test the function
+            const testResult = getRRP(32);
+            console.log('Test getRRP(32):', testResult);
+            if (testResult !== 486) {
+                console.error('❌ getRRP test failed! Expected 486, got:', testResult);
+            } else {
+                console.log('✅ getRRP test passed!');
             }
         }
     } catch (importError) {
@@ -224,10 +227,17 @@
         } catch (fallbackError) {
             console.error('❌ Fallback import also failed:', fallbackError);
             // Set defaults to prevent complete failure
-            getRRP = () => null;
+            // Use hardcoded values as last resort
+            const FALLBACK_CONFIG = {
+                32: 486,  // Assure Platinum Annual
+                33: 45,   // Assure Platinum Monthly
+                34: 378,  // Assure Gold Annual
+                35: 35,   // Assure Gold Monthly
+            };
+            getRRP = (productId) => FALLBACK_CONFIG[productId] || null;
             DEALER_ID = 533;
             CAMPAIGN_NAME = 'joinassure';
-            console.warn('⚠️ Using default values - form may not work correctly');
+            console.warn('⚠️ Using fallback hardcoded values - form will work but config import failed');
         }
     }
     
